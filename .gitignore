@@ -1,0 +1,11 @@
+# Editor / OS noise
+*.swp
+*~
+.DS_Store
+
+# Local scratch — never part of the system
+scratch/
+*.local.md
+
+# Session-local Claude Code settings
+.claude/settings.local.json
