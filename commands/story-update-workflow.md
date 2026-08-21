@@ -1,6 +1,6 @@
 ---
 description: Change the /story-* workflow itself — propose an edit plan, then edit and sync every mirror
-argument-hint: "<what to change about the workflow>"
+argument-hint: "<description of the change>"
 ---
 
 # /story-update-workflow
@@ -12,8 +12,8 @@ behavior.
 Argument (required): `$ARGUMENTS` — a description of the change. With no argument, ask what to
 change and stop.
 
-**This command takes no case and writes nothing to `~/.claude/plans/`.** Changes to the workflow
-are not cases.
+**This command takes no case and writes nothing to a case home.** Changes to the workflow are not
+cases.
 
 ## Step 1 — propose the edit plan, then stop
 
@@ -36,23 +36,31 @@ Make the substantive edit, then bring every mirror along **in the same pass and 
 | Mirror | Update when |
 |---|---|
 | `commands/story-explain-workflow.md` — the embedded reference | **always.** Any behavior change, gate change, or file-set change |
-| `README.md` — the command table, the loop, the case-home layout | the command set, a step, a gate, or the layout changed |
-| `skills/story-context-home/templates/` | a document's sections, order, or budgets changed |
+| `workflow_flowchart.md` — the rendered Mermaid mirror | any change to a flow, a gate, a state transition, or the command set |
+| `README.md` — the command tables, the flows, the case-home layout | the command set, a step, a gate, or the layout changed |
+| `skills/story-context-home/templates/STORY-ARTIFACTS.md` | an artifact's sections, order, or budgets changed |
 | `plan_initial.md` §6 target layout | a file was added or removed |
 
 A behavior change that does not land in the embedded reference is the failure this command
 exists to prevent. If you cannot state the change in the reference, you do not understand it well
 enough to have made it.
 
+**The diagrams live in exactly one place.** `workflow_flowchart.md` is the only file in this repo
+that renders a flow as Mermaid; `story-explain-workflow` carries prose and ASCII sketches
+deliberately, so there is never a second rendering to contradict the first. Do not add a Mermaid
+fence to the reference or the README to "help" — reconcile the flowchart instead.
+
 Keep the architecture intact while you edit: **commands stay thin** (parse, delegate, relay) and
 **logic lives in skills**. If the change wants a command to hold a rule, put the rule in the
 skill and have the command load it. That separation is the single thing most worth protecting.
+The three follow-up wrappers are the sharpest case: a rule written into one of them is a rule in
+the wrong file.
 
 ## Step 3 — install, record, commit
 
 1. **Re-run `install.sh`** if a command, skill, or agent file was added or removed, and report
-   its output. Not needed for edits to existing files — they are symlinked, so edits are live
-   immediately.
+   its output — including anything it pruned. Not needed for edits to existing files; they are
+   symlinked, so edits are live immediately.
 2. **Save the approved edit plan** to `workflow-modification-plans/YYYY-MM-DD_<short-name>.md` —
    what was asked, what was decided, what was changed. This is the record of why the system
    looks the way it does.
@@ -63,8 +71,9 @@ skill and have the command load it. That separation is the single thing most wor
 
 ## This command never
 
-- Writes to `~/.claude/plans/` or touches a case home.
-- Edits `~/.claude/llmwiki/CLAUDE.md` or any project repo.
+- Writes to a case home under `~/.claude/plans/`.
+- Edits `~/.claude/llmwiki/CLAUDE.md` or any project repo. If a change to the workflow implies a
+  change to the wiki schema, **say so and hand it to the user** — it is theirs to apply.
 - Skips the edit-plan gate, even for a one-word change.
 - Leaves a mirror stale to be caught up later.
 - Pushes.

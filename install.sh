@@ -10,6 +10,10 @@
 # target resolves inside this repo. A real file or directory at a destination path
 # is reported as BLOCKED and left completely alone — which is what keeps the
 # pre-existing ~/.claude/skills/llm-wiki safe.
+#
+# It also prunes its own dangling links: when a command, skill, or agent is renamed
+# or deleted upstream, the link left behind in ~/.claude/ would otherwise keep the
+# old name live. --check reports those as STALE.
 
 set -uo pipefail
 
@@ -29,6 +33,7 @@ n_linked=0    # destination is our symlink, pointing at the right place
 n_missing=0   # nothing there yet
 n_blocked=0   # a real file, or a symlink pointing somewhere else
 n_changed=0   # created / repaired / removed this run
+n_stale=0     # our own symlink whose target no longer exists in the repo
 
 # is_ours <path> — true when <path> is a symlink resolving inside REPO_DIR
 is_ours() {
@@ -99,10 +104,29 @@ for src in "$REPO_DIR"/agents/*.md; do
   handle "$src" "$CLAUDE_DIR/agents/$(basename "$src")"
 done
 
+# Prune our own dangling links — the ones left behind when a command, skill, or agent is
+# renamed or deleted upstream. A dangling link still resolves inside REPO_DIR, so is_ours
+# holds; -e fails because the target is gone. Anything not ours is never touched.
+for d in commands skills agents; do
+  for dest in "$CLAUDE_DIR/$d"/*; do
+    [ -L "$dest" ] || continue
+    is_ours "$dest" || continue
+    [ -e "$dest" ] && continue
+    rel="${dest#$CLAUDE_DIR/}"
+    case "$MODE" in
+      install) rm -f "$dest"; n_changed=$((n_changed + 1))
+               printf '  pruned   ~/.claude/%s (target gone from the repo)\n' "$rel" ;;
+      check)   n_stale=$((n_stale + 1)); printf '  STALE    ~/.claude/%s -> %s\n' "$rel" "$(readlink "$dest")" ;;
+      remove)  rm -f "$dest"; n_changed=$((n_changed + 1))
+               printf '  removed  ~/.claude/%s (stale)\n' "$rel" ;;
+    esac
+  done
+done
+
 echo
 case "$MODE" in
   install) printf 'installed: %d linked, %d blocked, %d changed this run\n' "$n_linked" "$n_blocked" "$n_changed" ;;
-  check)   printf 'check: %d linked, %d missing, %d blocked\n' "$n_linked" "$n_missing" "$n_blocked"
-           [ "$n_missing" -eq 0 ] && [ "$n_blocked" -eq 0 ] || exit 1 ;;
+  check)   printf 'check: %d linked, %d missing, %d blocked, %d stale\n' "$n_linked" "$n_missing" "$n_blocked" "$n_stale"
+           [ "$n_missing" -eq 0 ] && [ "$n_blocked" -eq 0 ] && [ "$n_stale" -eq 0 ] || exit 1 ;;
   remove)  printf 'removed: %d symlinks (real files and other skills untouched)\n' "$n_changed" ;;
 esac

@@ -6,6 +6,12 @@
 > Target: a **deliberately smaller** system on this personal machine — four workflow steps,
 > three comprehension gates, two durable documents per case.
 
+> **Superseded, 2026-08-20.** Sections 1–5 and 7–11 below describe the system's *initial* build
+> and are kept as history — the command set, the artifacts, and several of the boundaries have
+> changed since. Section 6 is a live mirror and is kept current. What the system does today is in
+> `README.md` and `/story-explain-workflow`; why it changed is in
+> `workflow-modification-plans/2026-08-20_big-update.md`.
+
 ---
 
 ## 1. What we are building
@@ -171,36 +177,55 @@ Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
 
 ## 6. Target layout
 
+**Current**, as of 2026-08-20. This section is a mirror: `/story-update-workflow` keeps it in
+step whenever a file is added or removed.
+
 ```
-/home/nic/repos/sde-agentic-workflow/     # git init here
-├── README.md                             # mirror #1: command table, layout, the loop
-├── SDE-story-workflow-explained.md       # mirror #2: the work system, kept as reference
+/home/nic/repos/sde-agentic-workflow/
+├── README.md                             # mirror #1: command tables, layout, the flows
+├── workflow_flowchart.md                 # mirror #2: the ONE place Mermaid diagrams live
+├── SDE-story-workflow-explained.md       # the work system this one is adapted from (reference)
 ├── SDE-Workflow-wiki.pdf                 # original reference, untouched
 ├── plan_initial.md                       # this file
 ├── install.sh                            # idempotent symlinker: install / --check / --remove
-├── commands/                             # 7 story-*.md
-│   ├── story-plan.md
-│   ├── story-tdd-red.md
-│   ├── story-build.md
-│   ├── story-check.md
+├── commands/                             # 17 story-*.md
+│   ├── story-1-start.md
+│   ├── story-2-plan.md
+│   ├── story-3-tdd-red.md
+│   ├── story-4-tdd-green.md
+│   ├── story-5-check.md
+│   ├── story-6-wrap.md
+│   ├── story-followup-1-start.md
+│   ├── story-followup-2-plan.md
+│   ├── story-followup-3-tdd-red.md       # thin wrapper
+│   ├── story-followup-4-tdd-green.md     # thin wrapper
+│   ├── story-followup-5-check.md         # thin wrapper
+│   ├── story-followup-6-wrap.md
+│   ├── story-review.md                   # optional
+│   ├── story-model.md                    # optional
 │   ├── story-resume.md
-│   ├── story-explain-workflow.md
+│   ├── story-explain-workflow.md         # mirror #3: the embedded reference
 │   └── story-update-workflow.md
 ├── skills/
-│   ├── story-context-home/SKILL.md       # + templates/plan.md, templates/diagrams.md
+│   ├── story-context-home/SKILL.md       # + templates/STORY-ARTIFACTS.md
 │   ├── story-intake/SKILL.md
-│   ├── story-diagrams/SKILL.md
-│   └── story-tdd/SKILL.md
+│   ├── story-architecture-diagram/SKILL.md
+│   ├── story-tdd/SKILL.md
+│   ├── story-wrap/SKILL.md
+│   └── story-followup/SKILL.md
 ├── agents/
+│   ├── story-researcher.md
+│   ├── story-planner.md
 │   ├── story-builder.md
-│   └── story-divergence.md
+│   └── story-checker.md
 └── workflow-modification-plans/          # the approved plan behind each change to the system
 ```
 
 `install.sh` symlinks `commands/*.md` → `~/.claude/commands/`, each `skills/*/` →
-`~/.claude/skills/`, `agents/*.md` → `~/.claude/agents/`; creates the two missing parent
+`~/.claude/skills/`, `agents/*.md` → `~/.claude/agents/`; creates the missing parent
 directories; **never overwrites a real file** (only its own symlinks) — so the existing
-`llm-wiki` skill is safe. Re-runnable after a `git pull`.
+`llm-wiki` skill is safe; and prunes its own dangling links when a file is renamed or removed
+upstream. Re-runnable after a `git pull`.
 
 ---
 
