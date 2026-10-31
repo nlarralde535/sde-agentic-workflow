@@ -35,7 +35,9 @@ end up seeing the design you were told to expect.
 1. **Log as you go** to `STATUS-story-checker.md` in the case home, a line per stage.
 2. **Start the verification suite in the background.** Launch the whole-suite test command from
    `PLAN.md`'s `## Commands` (and the build command) as a background run **now**, so it is working
-   while you do the divergence pass. Read `## Commands` for this and nothing else yet.
+   while you do the divergence pass. Read `## Commands` for this and nothing else yet. If it has
+   `Test (layer: …)` rows, chain them lowest layer first ahead of the whole-suite command, and
+   report the first failing layer in the verdict.
 3. **Read the change.** `git -C <repo> diff` against the branch point, `git log` for this case's
    commits, and the changed files in full. Build your own account of the shape: what the pieces
    are, what calls what, what the sequence is, where the failure paths go.

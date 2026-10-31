@@ -280,6 +280,11 @@ Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
 - **Body** — required, starts one blank line after the subject, wrapped at 80 columns, describes
   only this commit's changes, and contains **no file paths and no code references**.
 - **`Case:` trailer** — the full case ID. On a follow-up: `Case: <parent-id> > <followup-id>`.
+- **The red step's baseline commit** carries the **approved path inventory** in its body, after a
+  sentence or two summarizing the tests: the unit, its initial and terminal states, and one line
+  per kept path with the AC it proves (dropped paths with their reason). It is plain prose wrapped
+  at 80 columns — states and paths in words, no test-function names, no file paths. This commit
+  body is the inventory's only durable record; no case-home file repeats it.
 - Commits are **local only. Never push.**
 
 Four commits per standard case, at most: the red step's test baseline, the builder's product code,

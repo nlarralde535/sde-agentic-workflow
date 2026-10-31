@@ -23,7 +23,7 @@ One case = one unit of work. All its artifacts live in one context home under
 |---|---|---|---|
 | 1 | `/story-1-start [desc]` | Intake in the session — the change, the project, the repo and branch, the test and build commands — then scaffolds the case home (`STATE.json`, `STATUS.md`, `PLAN.md` context) and launches the **`story-researcher`** agent, which sweeps the codebase and reads the LLM Wiki for prior art. The session reads `RESEARCH.md` back and summarizes it. | read `RESEARCH.md`, answer its open questions |
 | 2 | `/story-2-plan` | The **`story-planner`** agent in **two passes**: `plan` writes `PLAN.md` (scope, 2–4 phases, **numbered** `AC1…ACn`, open questions, and a `## For the builder` section that *is* the builder's prompt at step 4); then, after your approval, `model` draws `ARCHITECTURE.md` and writes one ≤5-step manual procedure per criterion in `MANUAL_TESTING.md`. | **Gate 1** — approve the plan; then read the diagrams and the manual procedures |
-| 3 | `/story-3-tdd-red` | Author failing tests from the numbered criteria (`story-tdd`, red phase only), **amend `PLAN.md`** with whatever writing them turned up, run them and confirm they fail for the right reason — then commit tests + `PLAN.md` as the build's **baseline** and record the hash. | **Gate 2** — read and approve the tests and any amendment |
+| 3 | `/story-3-tdd-red` | Author failing tests from the numbered criteria (`story-tdd`, red phase only) in five stages: **design** the paths from initial to terminal states (`functional-test-design`), **write** path tests, **diagnose** each test's layer and how informative its failure is (`test-suite-analysis--diagnostic-capability`), **factor** common procedures into task libraries (`test-suite-analysis--test-tasks`), and **run** them to confirm they fail for the right reason. Then **amend `PLAN.md`** with what this turned up, and commit tests + helpers + `PLAN.md` as the build's **baseline**, with the path inventory in the commit body, and record the hash. | **Gate 2** — read and approve the tests, path inventory, layer map, task list and any amendment |
 | 4 | `/story-4-tdd-green` | Implement to green in the **`story-builder`** agent, prompted with almost nothing but `PLAN.md` and `ARCHITECTURE.md`; it commits locally. The session then **diffs the test files against the baseline** and surfaces any change the builder did not explain. | rule on any test change the audit finds |
 | 5 | `/story-5-check` | The **`story-checker`** agent reads the code first and the plan second: runs the verification suite in the background, refreshes `ARCHITECTURE.md` **in place**, reconciles `MANUAL_TESTING.md`, and logs every divergence. Commits docs. | **Gate 3** — review the divergence log, then test by hand |
 | — | `/story-review` | *(optional)* dispatches the built-in `/code-review` and `/security-review` over the branch diff into a `REVIEW.md` findings table | triage each finding |
@@ -164,9 +164,12 @@ sde-agentic-workflow/
 │   ├── story-context-home/               # + templates/STORY-ARTIFACTS.md
 │   ├── story-intake/
 │   ├── story-architecture-diagram/
-│   ├── story-tdd/
+│   ├── story-tdd/                        # the red phase; loads the three below as its stages
 │   ├── story-wrap/
-│   └── story-followup/
+│   ├── story-followup/
+│   ├── functional-test-design/           # red: design — states → paths → path tests
+│   ├── test-suite-analysis--diagnostic-capability/  # red: diagnose — layers, localizing failures
+│   └── test-suite-analysis--test-tasks/  # red: factor — common procedures → task library
 ├── agents/                               # 4 authoring agents
 │   ├── story-researcher.md               # the codebase sweep; reads the wiki, never writes it
 │   ├── story-planner.md                  # plan / model / flows

@@ -33,7 +33,9 @@ So:
 
 - **Default: do not touch a test.** Not to "fix an obvious typo", not because it is "clearly
   asserting the wrong thing", not temporarily. The same goes for test *configuration* — runner
-  config, coverage thresholds, shared fixtures, matchers.
+  config, coverage thresholds, shared fixtures, matchers — and for **task-library helpers**: the
+  functions the tests call to carry out their procedures were committed in the baseline and are
+  test code, covered by the same audit and the same `Test changes:` declaration.
 - **If a test appears genuinely wrong** — it contradicts an acceptance criterion, asserts
   something impossible, has a real bug — **prefer stopping and reporting it.** Say which test,
   what it asserts, why you believe it is wrong, and what you would need to proceed. A stopped
@@ -65,7 +67,9 @@ configuration the implementation genuinely requires.
 6. **Follow the codebase, not your habits.** Read neighbouring files for conventions — naming,
    module layout, error handling, comment density — and match them. New code should be
    indistinguishable in style from what is around it.
-7. **Verify for real.** Run the whole-suite test command and the build command from `## Commands`,
+7. **Verify for real.** If `## Commands` has `Test (layer: …)` rows, run them first, lowest layer
+   first, and report the first failing layer — that is where the fault is. Then run the
+   whole-suite test command and the build command from `## Commands`,
    verbatim, from the directories recorded. Read the actual output. **Never claim a result you did
    not run**, and never round a partial pass up to a pass.
 8. **Record special cases.** Anything the build turned up that a person should exercise by hand —

@@ -57,12 +57,12 @@ flowchart TD
     PH -. updates .-> DS2[["STATUS.md + STATE.json"]]:::docs
 
     PH --> T0(["You type: /story-3-tdd-red"]):::cmd
-    T0 --> TA["Main session, story-tdd skill, RED phase only:<br/>one test per numbered criterion, every assertion commented,<br/>run them and confirm they fail for the RIGHT reason.<br/>Amends PLAN.md with what writing them turned up"]:::sess
+    T0 --> TA["Main session, story-tdd skill, RED phase only, five stages:<br/>1 DESIGN — functional-test-design: initial states, terminal states,<br/>the paths between, each kept path mapped to an AC<br/>2 WRITE — path tests per criterion, every assertion commented<br/>3 DIAGNOSE — test-suite-analysis--diagnostic-capability:<br/>layer map, failures that localize, lowest-first run order<br/>4 FACTOR — test-suite-analysis--test-tasks: common procedures<br/>into task-library helpers, this pass's tests only<br/>5 RUN — confirm they fail for the RIGHT reason.<br/>Amends PLAN.md with what the stages turned up"]:::sess
     TA --> TQ{"did that change<br/>SCOPE or SHAPE?"}:::gate
     TQ -- yes --> P0
-    TQ -- no --> G2{"GATE 2<br/>read and APPROVE the tests<br/>+ any plan amendment"}:::gate
-    G2 -- "amend the tests" --> TA
-    G2 -- approved --> TC["Main session commits tests + PLAN.md &#9646;<br/>and records STATE.json.test_baseline_commit_hash —<br/>this is the contract the build is measured against"]:::sess
+    TQ -- no --> G2{"GATE 2<br/>read and APPROVE the tests, path inventory,<br/>layer map, task list + any plan amendment.<br/>An accepted run order becomes<br/>Test (layer) rows in ## Commands"}:::gate
+    G2 -- "amend the tests, paths, layers or tasks" --> TA
+    G2 -- approved --> TC["Main session commits tests + helpers + PLAN.md &#9646;<br/>with the path inventory in the commit body,<br/>and records STATE.json.test_baseline_commit_hash —<br/>this is the contract the build is measured against"]:::sess
 
     TC --> B0(["You type: /story-4-tdd-green"]):::cmd
     B0 --> BA[/"agent: story-builder — prompted with almost nothing:<br/>PLAN.md's For the builder + ARCHITECTURE.md.<br/>Implements every phase to green, runs the REAL test<br/>and build commands, commits locally &#9646;"/]:::agent
@@ -130,10 +130,10 @@ flowchart TD
     FG1 -- "amend in place" --> FPA
 
     FG1 -- approved --> FT0(["/story-followup-3-tdd-red<br/>thin wrapper over /story-3-tdd-red"]):::cmd
-    FT0 --> FTA["Author the tests ## Test changes enumerates —<br/>usually edits to EXISTING files.<br/>Run them, confirm they fail correctly"]:::sess
+    FT0 --> FTA["Author the tests ## Test changes enumerates —<br/>usually edits to EXISTING files. Same five stages,<br/>scoped to the delta: design only the changed paths,<br/>diagnose and factor only the tests touched.<br/>Run them, confirm they fail correctly"]:::sess
     FTA --> FG2{"GATE 2 of 2<br/>read and APPROVE the tests<br/>+ any plan amendment"}:::gate
     FG2 -- "re-plan needed" --> FP0
-    FG2 -- approved --> FTC["Commit tests + PLAN.md &#9646; on the follow-up branch,<br/>trailer 'Case: PARENT &gt; SUB';<br/>record test_baseline_commit_hash"]:::sess
+    FG2 -- approved --> FTC["Commit tests + helpers + PLAN.md &#9646; on the follow-up branch,<br/>path inventory in the body, trailer 'Case: PARENT &gt; SUB';<br/>record test_baseline_commit_hash"]:::sess
 
     FTC --> FB0(["/story-followup-4-tdd-green<br/>thin wrapper over /story-4-tdd-green"]):::cmd
     FB0 --> FBA[/"agent: story-builder, workflow=followup.<br/>Same contract, same audit — followup changes only<br/>WHERE it runs and where it records. Commits &#9646;"/]:::agent

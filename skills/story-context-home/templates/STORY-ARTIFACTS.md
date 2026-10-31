@@ -134,6 +134,14 @@ Established during intake, run verbatim by `/story-3-tdd-red` and the agents.
 | Test (this case's files) | `<command>` | `<path>` |
 | Build | `<command>` | `<path>` |
 
+*Optional, added at Gate 2 only if the user accepts the layer run order the red step proposes —
+one row per implementation layer, **lowest layer first**. The builder and checker run these in
+order before the whole-suite command and report the first failing layer. Delete this note if the
+case has none.*
+
+| Test (layer: `<lowest layer>`) | `<command>` | `<path>` |
+| Test (layer: `<next layer>`) | `<command>` | `<path>` |
+
 ## For the builder
 
 This section is the builder's prompt. 5–10 lines.

@@ -1,6 +1,6 @@
 ---
 name: story-tdd
-description: The red phase of test-driven development for a story case — turn the plan's numbered acceptance criteria into failing tests that encode intended behavior, comment every setup step and assertion for a junior reader, run them, confirm they fail for the right reason, then commit them with PLAN.md as the build's test baseline. Scoped to red only; the same pass never writes tests and product code. Load it from /story-3-tdd-red and /story-followup-3-tdd-red.
+description: The red phase of test-driven development for a story case — design the tests by state-and-path coverage (functional-test-design), write path tests that encode the plan's numbered acceptance criteria with every setup step and assertion commented for a junior reader, check their diagnostic capability layer by layer (test-suite-analysis--diagnostic-capability), factor out common test tasks (test-suite-analysis--test-tasks), run them, confirm they fail for the right reason, then commit them with PLAN.md as the build's test baseline, the approved path inventory in the commit body. Scoped to red only; the same pass never writes tests and product code. Load it from /story-3-tdd-red and /story-followup-3-tdd-red.
 ---
 
 # Story TDD — the red phase
@@ -21,10 +21,31 @@ both produces tests shaped around the implementation that happened to appear, wh
 meaningless. If you find yourself reaching for the product file to "make it importable", stop:
 that is the build's job, and the import error *is* the red.
 
+## The red pass, in order
+
+Five stages, in this order. Three of them are run by their own skill — load each one when you
+reach its stage and follow its `## When loaded from story-tdd` section.
+
+| # | Stage | Skill | What it produces |
+|---|---|---|---|
+| 1 | **Design** | `functional-test-design` | the **path inventory** — initial states, terminal states, the chosen paths, each mapped to an AC |
+| 2 | **Write** | this skill | one or more **path tests** per AC, commented for a junior reader |
+| 3 | **Diagnose** | `test-suite-analysis--diagnostic-capability` | the **layer map**, sharper failures, any lower-layer tests, a proposed layer run order |
+| 4 | **Factor** | `test-suite-analysis--test-tasks` | the **task list** — common procedures extracted into task-library functions |
+| 5 | **Run** | this skill | the real red output, failing for the right reason |
+
+Why this order: the paths are where the tests come from, so design comes first. Diagnose can split
+tests or add lower-layer ones, so factoring waits for the final set. The red run comes last, so it
+exercises exactly what will be committed — extracted helpers included.
+
+The two "where" axes stay apart: **states and paths** describe running code (design);
+**implementation layers** describe the code's static structure (diagnose).
+
 ## What to test
 
-Read `## Acceptance criteria` in `PLAN.md`. **Each numbered criterion becomes at least one test**,
-and the test names it: a reader should be able to point at a test and say "that's AC2". Name
+Read `## Acceptance criteria` in `PLAN.md`. **Each numbered criterion becomes at least one path
+test** — a path from the design stage's inventory — and the test names both: a reader should be
+able to point at a test and say "that's AC2, from an empty queue to a rejected entry". Name
 tests after the behavior (`rejects a queue entry already read today`), never after the
 implementation (`test_selectQueue_branch_2`).
 
@@ -34,7 +55,9 @@ survives the build choosing a different helper.
 
 On a **follow-up**, the tests to write are enumerated in the plan's `## Test changes` list, and
 they usually **edit existing test files** rather than add new ones. Work that list; if writing
-them turns up something the list missed, add it and say so at the gate.
+them turns up something the list missed, add it and say so at the gate. The design stage covers
+only the delta — the paths the list adds or changes — and diagnose and factor are scoped to the
+tests this pass touched.
 
 ### Where to draw the line
 
@@ -46,6 +69,10 @@ Be realistic about coverage rather than exhaustive:
 - **Leave pure rendering to the manual test.** `MANUAL_TESTING.md` already has a procedure for
   every AC; a test that asserts a div exists costs more to maintain than it catches.
 - **One failure mode that matters** gets a test. Not every failure mode.
+
+The design stage's *choose* rule is how this line gets drawn in practice: paths an AC depends on
+are kept, paths that add no new transition are dropped, and manual-only paths go to the manual
+procedure — each drop with its reason.
 
 If a criterion cannot be tested at this level, say so at the gate and let the user decide whether
 to reword the criterion or leave it to the manual procedure — do not quietly skip it.
@@ -88,14 +115,30 @@ and send the user back to `/story-2-plan`. Re-planning is cheap here and expensi
 
 ## The gate, then the baseline commit
 
-**Gate:** present the test files (or their diff), the **real** red output, the criterion each test
-encodes, any amendment to `PLAN.md`, and anything a criterion could not express as a test. No
-product code has been written. Control returns to the user.
+**Gate:** present, with the tests as the main thing:
+
+- the test files (or their diff), the criterion and path each test encodes, and the **real** red
+  output,
+- the **path inventory** (design), the **layer map** with the proposed layer run order
+  (diagnose), and the **task list** with any candidate refactors of pre-existing tests (factor) —
+  **each capped at about 10 lines**,
+- any amendment to `PLAN.md`, and anything a criterion could not express as a test.
+
+No product code has been written. Control returns to the user.
+
+The user may ask for **any** of these to change — a path added or dropped, a layer run order
+rejected, a task inlined. Change the tests to match, re-run, and present again. If the user
+accepts the layer run order, amend it into `PLAN.md`'s `## Commands` as optional
+`Test (layer: <name>)` rows, lowest layer first; if they want candidate refactors of pre-existing
+tests, add them to `PLAN.md`'s `## Follow-ups`.
 
 **Only after the user approves**, commit — this is the one commit the red step makes:
 
-1. Stage **the test files and `PLAN.md`**, nothing else.
-2. Commit per `story-context-home` (type `patch` or `minor`, `Case:` trailer, no push).
+1. Stage **the test files, any task-library or fixture files this pass created or changed, and
+   `PLAN.md`**, nothing else. Helpers are test code: they are part of the contract.
+2. Commit per `story-context-home` (type `patch` or `minor`, `Case:` trailer, no push). The body
+   carries the **approved path inventory** — the commit is where it is recorded; no case-home file
+   holds it.
 3. Record the resulting hash in `STATE.json` as `test_baseline_commit_hash`, and set
    `current_step` to `tested-red`.
 
@@ -107,4 +150,6 @@ without it leaves the build unaudited.
 - Never writes product code, or edits a product file "just enough" to make a test importable.
 - Never commits before the user has approved the tests.
 - Never writes into the case home beyond `PLAN.md`'s amendment and `## Open Questions`.
+- Never edits a pre-existing test to use a new task or to sharpen its failure — those are
+  reported as candidates, not applied.
 - Never pushes, branches, or merges.

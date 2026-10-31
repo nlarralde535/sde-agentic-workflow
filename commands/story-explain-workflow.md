@@ -154,13 +154,28 @@ exempt from every budget and is **never edited** — you answer inline, and your
 
 ### `/story-3-tdd-red [case-id]` — step 3
 - **You:** read and approve the failing tests. They are the contract the build is measured against.
-- **AI:** `story-tdd` skill, red phase only — each numbered criterion becomes a test of *intended
-  behavior*, every setup step and assertion commented for a junior reader; runs them with the
-  narrow command from `## Commands` and confirms they fail **for the right reason**. Amends
-  `PLAN.md` with what writing them turned up; a change to *scope* sends you back to step 2.
-- **Gate 2** — the contract. The same pass never writes tests *and* product code.
-- **Writes:** test files in the project repo. **On approval:** commits tests + `PLAN.md` and
-  records `STATE.json.test_baseline_commit_hash`.
+- **AI:** `story-tdd` skill, red phase only, in five stages:
+  1. **design** (`functional-test-design`): initial states and terminal states lead to the paths
+     between them; the paths worth testing are chosen and each is mapped to an AC,
+  2. **write**: one or more *path tests* per criterion, testing intended behavior, with every
+     setup step and assertion commented for a junior reader,
+  3. **diagnose** (`test-suite-analysis--diagnostic-capability`): map the tests to the code's
+     implementation layers, sharpen failures so they say *where, predicted, actual*, and propose a
+     lowest-layer-first run order,
+  4. **factor** (`test-suite-analysis--test-tasks`): extract common test procedures into
+     task-library functions, from this pass's tests only,
+  5. **run**: the narrow command from `## Commands`; confirm the tests fail **for the right
+     reason**.
+
+  It amends `PLAN.md` with what the stages turned up. A change to *scope* sends you back to
+  step 2.
+- **Gate 2** — the contract: the tests, the red output, the path inventory, the layer map and the
+  task list (each about 10 lines at most). You can change any of them. An accepted layer run order
+  becomes optional `Test (layer: …)` rows in `## Commands`, which the builder and checker run
+  lowest layer first. The same pass never writes tests *and* product code.
+- **Writes:** tests and task-library helpers in the project repo. **On approval:** commits tests,
+  helpers and `PLAN.md`, with the approved path inventory in the commit body, and records
+  `STATE.json.test_baseline_commit_hash`.
 
 ### `/story-4-tdd-green [case-id]` — step 4
 - **You:** nothing during the run; then rule on any test change the audit surfaces.
@@ -259,8 +274,18 @@ exempt from every budget and is **never edited** — you answer inline, and your
   research brief. Never guesses the project, never invents a case ID.
 - **`story-architecture-diagram` skill** — PLANNED / REFRESH-in-place / FLOWS modes, the section
   order, and the two rules: **one set, always current** and **one altitude, no tiers**.
-- **`story-tdd` skill** — the red phase only, plus the baseline commit that makes the audit
-  possible.
+- **`story-tdd` skill** — the red phase only, its five stages in order, plus the baseline commit
+  that makes the audit possible.
+- **`functional-test-design` skill** — the red step's design stage. Initial states, terminal
+  states and the paths between them, chosen by an explicit coverage rule. States describe
+  *running* code. Usable outside a case.
+- **`test-suite-analysis--diagnostic-capability` skill** — the red step's diagnose stage. Does a
+  failure say where, what was predicted, and what happened? It works from implementation layers,
+  which describe the code's *static* structure, and its lowest-first run order is how a suite
+  "zooms out from the smoke test". Usable outside a case.
+- **`test-suite-analysis--test-tasks` skill** — the red step's factor stage. It moves common test
+  procedures into task libraries (tasks are not fixtures, and tasks never assert). Task-library
+  helpers are test code, part of the baseline. Usable outside a case.
 - **`story-wrap` skill** — the wiki write-up, the deletion list, the merge policy.
 - **`story-followup` skill** — the nested home, rounds, what lands on the parent, and the
   never-merge-to-a-shared-branch rule.

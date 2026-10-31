@@ -177,7 +177,7 @@ Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
 
 ## 6. Target layout
 
-**Current**, as of 2026-08-20. This section is a mirror: `/story-update-workflow` keeps it in
+**Current**, as of 2026-10-31. This section is a mirror: `/story-update-workflow` keeps it in
 step whenever a file is added or removed.
 
 ```
@@ -212,7 +212,10 @@ step whenever a file is added or removed.
 │   ├── story-architecture-diagram/SKILL.md
 │   ├── story-tdd/SKILL.md
 │   ├── story-wrap/SKILL.md
-│   └── story-followup/SKILL.md
+│   ├── story-followup/SKILL.md
+│   ├── functional-test-design/SKILL.md                     # red-step stage: design
+│   ├── test-suite-analysis--diagnostic-capability/SKILL.md # red-step stage: diagnose
+│   └── test-suite-analysis--test-tasks/SKILL.md            # red-step stage: factor
 ├── agents/
 │   ├── story-researcher.md
 │   ├── story-planner.md

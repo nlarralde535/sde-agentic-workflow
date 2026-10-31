@@ -24,7 +24,9 @@ recently modified live case.
    plan's `## For the builder` section is the prompt, by design. A builder briefed by a chat
    summary builds the summary.
 4. **Audit the test diff** when it returns:
-   `git -C <repo> diff <test_baseline_commit_hash>..HEAD -- <the test paths>`.
+   `git -C <repo> diff <test_baseline_commit_hash>..HEAD -- <the test paths>`. The test paths
+   include task-library and fixture files and test configuration, not just test files: a helper
+   edit changes what a test means as surely as an assertion edit.
    - No changes → say so in one line.
    - Changes the builder's `Test changes:` line explains → relay both, together.
    - **Changes it did not explain** → surface each one to the user as a finding: which file, what
